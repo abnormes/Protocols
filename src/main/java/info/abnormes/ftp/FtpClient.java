@@ -11,5 +11,7 @@ public interface FtpClient {
     void connect() throws IOException;
 
     // Method to disconnect from server, if disconnection is failed, should return false
-    void disconnect();
+    void disconnect() throws IOException;
+
+    void getFilesList();
 }

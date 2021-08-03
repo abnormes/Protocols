@@ -2,14 +2,21 @@ package info.abnormes.ftp.impl;
 
 import info.abnormes.ftp.FtpClient;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.util.stream.Collectors;
 
 public class SimpleFtpClient implements FtpClient {
 
-    private String server;
-    private Integer port;
-    private String username;
-    private String password;
+    private final String server;
+    private final Integer port;
+    private final String username;
+    private final String password;
+
+    private URLConnection urlConnection;
+    private InputStream inputStream;
 
     /**
      * Constructor with custom server and port
@@ -55,11 +62,34 @@ public class SimpleFtpClient implements FtpClient {
 
     @Override
     public void connect() throws IOException {
-        throw new IOException("Exception");
+        String ftpUrl = getFtpUrl();
+        urlConnection = new URL(ftpUrl).openConnection();
+        inputStream = urlConnection.getInputStream();
+    }
+
+    private String getFtpUrl() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder   .append("ftp://")
+                        .append(username)
+                        .append(":")
+                        .append(password)
+                        .append("@")
+                        .append(server)
+                        .append(":")
+                        .append(port);
+
+        return stringBuilder.toString();
     }
 
     @Override
-    public void disconnect() {
+    public void getFilesList() {
+        String result = new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.joining("\n"));
+        System.out.println(result);
+    }
 
+    @Override
+    public void disconnect() throws IOException {
+        inputStream.close();
     }
 }
